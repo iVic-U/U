@@ -69,7 +69,7 @@ def realizar_venta():
             continue
         if cantidad_vender > inventario[idx][0]:
             print(f"Stock insuficiente. Stock disponible: {inventario[idx][0]}")
-            return False # FALSE ?
+            return
         else: break
         
     total = calcular_total_venta(idx, cantidad_vender)
@@ -89,7 +89,7 @@ def reabastecer_inventario():
     print("\n--- Reabastecer inventario ---")
     if not nombres:
         print("No hay productos registrados.")
-        return False # False again?
+        return
 
     consultar_inventario() # Seleccionar índice
     while True:
