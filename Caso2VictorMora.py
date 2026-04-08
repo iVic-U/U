@@ -1,69 +1,49 @@
-# Caso2VictorApellido.py
 # Proyecto: Gestión de inventario - Caso 2
-# Autor: Victor Apellido
-# Fecha: 2026-04-06
+
 # Descripción: Programa para registrar productos, consultar inventario, realizar ventas y reabastecer.
 
 # Variables globales
-nombres = []          # arreglo unidimensional: lista de nombres de productos
-inventario = []       # arreglo bidimensional: cada elemento [cantidad, precio]
+nombres:list[str] = []           # arreglo unidimensional: lista de nombres de productos
+inventario:list[list[int|float]] = []       # arreglo bidimensional: cada elemento [cantidad, precio]
 
 def registrar_productos():
-    """Permite ingresar uno o varios productos al inventario."""
-    global nombres, inventario
+    global nombre, inventario
+    """Permite ingresar uno o varios productos al inventario"""
     print("\n--- Registrar productos ---")
     while True:
-        nombre = input("Ingrese nombre del producto: ").strip()
+        nombre = input("Ingrese nombre del producto" + "\n------------- ")
         if nombre == "":
             print("El nombre no puede estar vacío. Intente de nuevo.")
-            continue
-
-        # Leer cantidad
-        while True:
-            try:
-                cantidad = int(input("Ingrese cantidad disponible (entero >= 0): "))
-                if cantidad < 0:
-                    print("La cantidad debe ser >= 0.")
-                    continue
+            continue # Continua hasta que se coloque el nombre bien
+        while True: # Leer cantidad
+            cantidad = int(input("Ingrese cantidad disponible (entero >= 0)" + "\n------------- "))
+            if cantidad < 0:
+                print("La cantidad debe ser >= 0.\n")
+                continue # Vuelve a iniciar este bucle
+            elif cantidad > 0:
+                print("Cantidad guardada\n")
                 break
-            except ValueError:
-                print("Entrada inválida. Ingrese un número entero.")
-
-        # Leer precio
-        while True:
-            try:
-                precio = float(input("Ingrese precio unitario (>= 0): "))
-                if precio < 0:
-                    print("El precio debe ser >= 0.")
-                    continue
-                break
-            except ValueError:
-                print("Entrada inválida. Ingrese un número (ej: 12.50).")
-
+        while True: # Leer precio
+            precio = float(input("Ingrese precio unitario (>= 0)"  + "\n------------- "))
+            if precio < 0:
+                print("El precio debe ser >= 0.")
+                continue
+            else: break
         nombres.append(nombre)
         inventario.append([cantidad, precio])
         print(f"Producto '{nombre}' registrado correctamente.")
-
-        otro = input("¿Desea registrar otro producto? (s/n): ").strip().lower()
-        if otro != 's':
-            break
+        break   
 
 def consultar_inventario():
-    """Muestra el inventario completo con índices, nombres, cantidades y precios."""
+    """Muestra el inventario completo con índices, nombres, cantidades y precios"""
     print("\n--- Inventario ---")
     if not nombres:
-        print("El inventario está vacío.")
+        print("El inventario está vacío\n")
         return
-    print(f"{'Índice':<6} {'Producto':<20} {'Cantidad':<10} {'Precio':<10}")
+    print(f"{'Índice':<6} {'Producto':<20} {'Cantidad':<10} {'Precio':<10}") # Se realiza un pequeño espaciado para que los datos se puedan mostrar de mejor forma
     for i, nombre in enumerate(nombres):
         cantidad, precio = inventario[i]
-        print(f"{i:<6} {nombre:<20} {cantidad:<10} ${precio:,.2f}")
-
-def calcular_total_venta(indice, cantidad_vendida):
-    """Calcula y retorna el total de la venta para un producto dado."""
-    precio_unitario = inventario[indice][1]
-    total = cantidad_vendida * precio_unitario
-    return total
+        print(f"{i:<6} {nombre:<20} {cantidad:<10} ${precio:,.2f}") # Se utiliza el precio en dolares y se redondea a 2 decimales
 
 def realizar_venta():
     """Realiza la venta de un producto si hay stock suficiente y actualiza el inventario."""
@@ -73,82 +53,70 @@ def realizar_venta():
         print("No hay productos registrados.")
         return
 
-    consultar_inventario()
-    # Seleccionar índice
+    consultar_inventario() # Seleccionar índice
     while True:
-        try:
-            idx = int(input("Ingrese el índice del producto a vender: "))
-            if idx < 0 or idx >= len(nombres):
-                print("Índice fuera de rango. Intente de nuevo.")
-                continue
-            break
-        except ValueError:
-            print("Entrada inválida. Ingrese un número entero.")
-
-    # Cantidad a vender
-    while True:
-        try:
-            cantidad_vender = int(input("Ingrese la cantidad a vender: "))
-            if cantidad_vender <= 0:
-                print("La cantidad debe ser mayor que 0.")
-                continue
-            if cantidad_vender > inventario[idx][0]:
-                print(f"Stock insuficiente. Stock disponible: {inventario[idx][0]}")
-                return
-            break
-        except ValueError:
-            print("Entrada inválida. Ingrese un número entero.")
-
+        
+        idx = int(input("Ingrese el índice del producto a vender: "))
+        if idx < 0 or idx >= len(nombres):
+            print("Índice fuera de rango. Intente de nuevo.")
+            continue
+        else: break
+    while True: # Cantidad a vender
+        
+        cantidad_vender = int(input("Ingrese la cantidad a vender: "))
+        if cantidad_vender <= 0:
+            print("La cantidad debe ser mayor que 0.")
+            continue
+        if cantidad_vender > inventario[idx][0]:
+            print(f"Stock insuficiente. Stock disponible: {inventario[idx][0]}")
+            return False # FALSE ?
+        else: break
+        
     total = calcular_total_venta(idx, cantidad_vender)
-    # Actualizar inventario
-    inventario[idx][0] -= cantidad_vender
-    print(f"Venta realizada: {cantidad_vender} x {nombres[idx]} a ${inventario[idx][1]:,.2f} c/u")
+    inventario[idx][0] -= cantidad_vender # Actualizar inventario con el indice correspondiente
+    print(f"Venta realizada: {cantidad_vender} x {nombres[idx]} a ${inventario[idx][1]:,.2f} c/u") # Redondea?
     print(f"Total a pagar: ${total:,.2f}")
 
+def calcular_total_venta(indice:int, cantidad_vendida:int):
+    """Calcula y retorna el total de la venta para un producto dado"""
+    precio_unitario = inventario[indice][1]
+    total = cantidad_vendida * precio_unitario
+    return total
+
 def reabastecer_inventario():
-    """Añade stock a un producto existente."""
+    """Añade stock a un producto existente"""
     global inventario
     print("\n--- Reabastecer inventario ---")
     if not nombres:
         print("No hay productos registrados.")
-        return
+        return False # False again?
 
-    consultar_inventario()
-    # Seleccionar índice
+    consultar_inventario() # Seleccionar índice
     while True:
-        try:
-            idx = int(input("Ingrese el índice del producto a reabastecer: "))
-            if idx < 0 or idx >= len(nombres):
-                print("Índice fuera de rango. Intente de nuevo.")
-                continue
-            break
-        except ValueError:
-            print("Entrada inválida. Ingrese un número entero.")
-
-    # Cantidad a añadir
-    while True:
-        try:
-            cantidad_anadir = int(input("Ingrese la cantidad a añadir (entero > 0): "))
-            if cantidad_anadir <= 0:
-                print("La cantidad debe ser mayor que 0.")
-                continue
-            break
-        except ValueError:
-            print("Entrada inválida. Ingrese un número entero.")
-
+        idx = int(input("Ingrese el índice del producto a reabastecer: "))
+        if idx < 0 or idx >= len(nombres):
+            print("Índice fuera de rango. Intente de nuevo.")
+            continue
+        else: break
+    while True: # Cantidad a añadir
+        cantidad_anadir = int(input("Ingrese la cantidad a añadir (entero > 0): "))
+        if cantidad_anadir <= 0:
+            print("La cantidad debe ser mayor que 0.")
+            continue
+        else: break
     inventario[idx][0] += cantidad_anadir
-    print(f"Se añadieron {cantidad_anadir} unidades a '{nombres[idx]}'. Nuevo stock: {inventario[idx][0]}")
+    print(f"Se añadieron {cantidad_anadir} unidades a '{nombres[idx]}'. Nuevo stock: {inventario[idx][0]}") # Muestra el producto y el stock con el añadido
 
 def mostrar_menu():
-    print("\n==============================")
-    print(" Gestión de Inventario - Tienda Deportiva")
-    print("==============================")
-    print("1. Registrar productos")
-    print("2. Consultar inventario")
-    print("3. Realizar ventas")
-    print("4. Reabastecer inventario")
-    print("5. Salir")
-    print("==============================")
+    print("""\n==============================
+Gestión de Inventario - Tienda Deportiva
+==============================
+1. Registrar productos
+2. Consultar inventario
+3. Realizar ventas
+4. Reabastecer inventario
+5. Salir
+==============================""")
 
 def main():
     """Bucle principal del programa."""
@@ -169,3 +137,6 @@ def main():
         else:
             print("Opción inválida. Por favor seleccione una opción entre 1 y 5.")
 
+# - Programa - #
+
+main() # Unicamente es necesario llamar a la función main para que se ejecute todo el programa
